@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="jobApp">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Job Creation</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  </head>
+  <body
+    class="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-gray-900"
+  >
+    <div
+      class="card-container flex flex-wrap justify-around items-start p-5 min-h-screen bg-white bg-opacity-80 bg-fixed bg-cover"
+      ng-controller="JobFormController"
+    >
+      <div class="job-form bg-white p-5 rounded-lg shadow-lg w-96 mx-auto">
+        <h2 class="text-center text-2xl font-bold mb-4">Create a New Job</h2>
+        <form ng-submit="submitJob()">
+          <label for="jobTitle" class="font-bold">Job Title:</label>
+          <input
+            type="text"
+            id="jobTitle"
+            ng-model="job.title"
+            required
+            class="border border-gray-300 rounded-md py-2 px-3 mb-4 w-full"
+          />
+          <label for="rating" class="font-bold">Rating:</label>
+          <input
+            type="number"
+            id="rating"
+            ng-model="job.rating"
+            min="1.0"
+            max="5.0"
+            step="0.1"
+            required
+            class="border border-gray-300 rounded-md py-2 px-3 mb-4 w-full"
+          />
+
+          <label for="company" class="font-bold">Company:</label>
+          <input
+            type="text"
+            id="company"
+            ng-model="job.company"
+            required
+            class="border border-gray-300 rounded-md py-2 px-3 mb-4 w-full"
+          />
+
+          <label for="headquarters" class="font-bold">Headquarters:</label>
+          <input
+            type="text"
+            id="headquarters"
+            ng-model="job.headquarters"
+            required
+            class="border border-gray-300 rounded-md py-2 px-3 mb-4 w-full"
+          />
+
+          <label for="industry" class="font-bold">Industry:</label>
+          <select
+            id="industry"
+            ng-model="job.industry"
+            class="border border-gray-300 rounded-md py-2 px-3 mb-4 w-full"
+          >
+            <option value="Website design">Website design</option>
+            <option value="Wordpress">Wordpress</option>
+            <option value="Logo design">Logo design</option>
+            <option value="AI services">AI services</option>
+          </select>
+
+          <label for="salary" class="font-bold">Average Salary ($):</label>
+          <input
+            type="number"
+            id="salary"
+            ng-model="job.avg_salary"
+            required
+            class="border border-gray-300 rounded-md py-2 px-3 mb-4 w-full"
+          />
+
+          <button
+            type="submit"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
+    </div>
+    <script>
+      var app = angular.module("jobApp", []);
+      app.controller("JobFormController", function ($scope, $http) {
+        $scope.job = {};
+
+        $scope.submitJob = function () {
+          if ($scope.job.rating < 1.0 || $scope.job.rating > 5.0) {
+            alert("Rating must be between 1.0 and 5.0");
+            return; // Do not proceed if rating is out of range
+          }
+
+          // Check if the average salary is within the allowed range (above 499 and less than 19999)
+          if ($scope.job.avg_salary <= 499 || $scope.job.avg_salary >= 19999) {
+            alert("Average salary must be above 499 and less than 19999");
+            return; // Do not proceed if salary is out of range
+          }
+          // Send a POST request to your server with the job data
+          const jobData = {
+            "Job Title": $scope.job.title,
+            Rating: $scope.job.rating,
+            "Company Name": $scope.job.company,
+            Headquarters: $scope.job.headquarters,
+            Type: $scope.job.industry,
+            avg_salary: $scope.job.avg_salary,
+          };
+
+          $http
+            .post("http://localhost:5000/api/jobs", jobData)
+            .then(function (response) {
+              alert("Job added successfully!");
+            })
+            .catch(function (error) {
+              console.error(error);
+              alert("Error adding job. Please try again.");
+            });
+        };
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html ng-app="joborrApp">
+<head>
+    <title>Job Listings</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <style>
+        /* Add your additional CSS styles here */
+        body {
+            background-image: url("https://img.freepik.com/free-vector/aesthetic-dreamy-background-purple-cloudy-sky-vector-glitter-design_53876-156334.jpg");
+            background-size: cover;
+            background-position: center top;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: flex-start;
+            padding: 20px;
+            background-image: url("https://img.freepik.com/free-vector/aesthetic-dreamy-background-purple-cloudy-sky-vector-glitter-design_53876-156334.jpg");
+            background-size: cover;
+            background-position: center top;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .card.highlighted {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: calc(33.33% - 20px);
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+        }
+
+        .card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .card .rating {
+            color: #0011ff;
+            font-weight: bold;
+        }
+
+        .card .apply-button {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #6dafe7;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            align-self: center;
+        }
+
+        .card .apply-button:hover {
+            background-color: #0056b3;
+        }
+
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+    </style>
+</head>
+<body ng-controller="MainController">
+    <div class="card-container" id="cardContainer">
+        <div class="card" ng-repeat="job in filteredJobs">
+            <div class="card-content" ng-show="!job.isEditing">
+                <h3>{{ job['Job Title'] }}</h3>
+                <p>Rating: <span class="rating">{{ job.Rating }}</span></p>
+                <p>Company: {{ job['Company Name'] }}</p>
+                <p>Headquarters: {{ job.Headquarters }}</p>
+                <p>Industry: {{ job.Type }}</p>
+                <p>Average Salary: ${{ job.avg_salary }}</p>
+                <a href="javascript:void(0);" class="edit-button" ng-click="editJob(job)">Edit</a>
+            </div>
+            <div class="card-content" ng-show="job.isEditing">
+                <input type="text" ng-model="job.updatedTitle" placeholder="Updated Job Title">
+                <input type="text" ng-model="job.updatedRating" placeholder="Updated Rating">
+                <input type="text" ng-model="job.updatedCompanyName" placeholder="Updated Company Name">
+                <input type="text" ng-model="job.updatedHeadquarters" placeholder="Updated Headquarters">
+                <input type="text" ng-model="job.updatedType" placeholder="Updated Industry">
+                <input type="text" ng-model="job.updatedAvgSalary" placeholder="Updated Average Salary">
+                <a href="javascript:void(0);" class="update-button" ng-click="updateJob(job)">Update</a>
+            </div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script>
+        var app = angular.module('joborrApp', []);
+
+        // Factory to fetch job data
+        app.factory('JobService', function($http) {
+            return {
+                getJobs: function() {
+                    return $http.get('http://localhost:5000/jobs');
+                }
+            };
+        });
+
+        app.controller('MainController', function($scope, JobService, $http) {
+            // Fetch jobs using the JobService factory
+            JobService.getJobs().then(function(response) {
+                $scope.dataset = response.data;
+
+                // Initialize filteredJobs with all jobs
+                $scope.filteredJobs = $scope.dataset;
+            });
+
+            // Define the editJob function to toggle job editing mode
+            $scope.editJob = function(job) {
+                job.isEditing = true;
+                job.updatedTitle = job['Job Title'];
+                job.updatedRating = job.Rating;
+                job.updatedCompanyName = job['Company Name'];
+                job.updatedHeadquarters = job.Headquarters;
+                job.updatedType = job.Type;
+                job.updatedAvgSalary = job.avg_salary;
+            };
+
+            $scope.updateJob = function (job) {
+                // Prepare the updated job data
+                const updatedJobData = {
+                    'Job Title': job.updatedTitle,
+                    Rating: job.updatedRating,
+                    'Company Name': job.updatedCompanyName,
+                    Headquarters: job.updatedHeadquarters,
+                    Type: job.updatedType,
+                    avg_salary: job.updatedAvgSalary,
+                };
+
+                // Send a PUT request to update the job
+                $http.put('http://localhost:5000/api/jobs/' + job._id, updatedJobData) // Updated URL to '/api/jobs/:id'
+                    .then(function (response) {
+                        // Update the job data in the view
+                        job['Job Title'] = job.updatedTitle;
+                        job.Rating = job.updatedRating;
+                        job['Company Name'] = job.updatedCompanyName;
+                        job.Headquarters = job.updatedHeadquarters;
+                        job.Type = job.updatedType;
+                        job.avg_salary = job.updatedAvgSalary;
+                        job.isEditing = false;
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            };
+        });
+    </script>
+</body>
+</html>

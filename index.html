@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html ng-app="joborrApp">
+
+<head>
+    <title>Joborr</title>
+    <meta charset="UTF-8">
+    <meta name="joborr" content="connecting freelancers to communities">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined&display=swap">
+</head>
+
+<body ng-controller="MainController"
+    class="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-gray-900">
+
+    <!-- Header Section -->
+    <header class="py-4 bg-gray-100 border-b border-gray-200">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="./assets/joborr.png" alt="joborrlogo" width="140" class="logo">
+                <span id="loginStatus" class="text-red-500 ml-2">ADMIN ACCESS</span>
+            </div>
+            <nav class="space-x-6">
+                <a href="./components/login/index.html" class="text-black hover:text-yellow-400">Login</a>
+                <a href="#" class="text-black hover:text-yellow-400">About Us</a>
+                <a href="#" class="text-black hover:text-yellow-400">Community</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Admin Panel and Search Module Section -->
+    <section class="bg-white py-5">
+        <div class="container mx-auto px-5 flex items-center">
+            <!-- Admin Panel (Vertical Cards) -->
+            <div class="w-2/5 flex flex-col items-center space-y-2 bg-blue-150">
+    <div class="w-1/2 flex flex-col items-center space-y-2">
+        <div class="bg-yellow-400 hover:bg-yellow-500 text-white rounded-lg px-4 py-2 cursor-pointer w-40 text-center">
+            <a href="./components/createJobs/index.html" target="_blank" class="font-semibold">Add Jobs</a>
+        </div>
+        <div class="bg-yellow-400 hover:bg-yellow-500 text-white rounded-lg px-4 py-2 cursor-pointer w-40 text-center">
+            <a href="./components/updateJobs/index.html" class="font-semibold" target="_blank">Update Jobs</a>
+        </div>
+        <div class="bg-yellow-400 hover:bg-yellow-500 text-white rounded-lg px-4 py-2 cursor-pointer w-40 text-center">
+            <a href="./components/deleteJobs/index.html" class="font-semibold" target="_blank">Delete Jobs</a>
+        </div>
+        <div class="bg-yellow-400 hover:bg-yellow-500 text-white rounded-lg px-4 py-2 cursor-pointer w-40 text-center">
+            <a href="./components/analytics/index.html" class="font-semibold" target="_blank">Analytics</a>
+        </div>
+    </div>
+</div>
+
+            <!-- Search Module -->
+            <div class="w-1/2 mx-auto">
+                <div class="bg-gray-200 rounded-lg p-8 shadow-md">
+                    <p class="text-2xl font-semibold mb-4 text-center">Find the right jobs, <span class="italic">right away</span></p>
+                    <input type="text" id="job_search" placeholder="Search..." onkeyup="handleSearch(event)"
+                        class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-yellow-400">
+                    <br /><br />
+                    <ul class="flex justify-center space-x-4">
+                        <li><a href="javascript:void(0);" onclick="searchByCategory('Website design')"
+                                class="text-black hover:text-yellow-400">Website design</a></li>
+                        <li><a href="javascript:void(0);" onclick="searchByCategory('Wordpress')"
+                                class="text-black hover:text-yellow-400">Wordpress</a></li>
+                        <li><a href="javascript:void(0);" onclick="searchByCategory('Logo design')"
+                                class="text-black hover:text-yellow-400">Logo design</a></li>
+                        <li><a href="javascript:void(0);" onclick="searchByCategory('AI services')"
+                                class="text-black hover:text-yellow-400">AI services</a></li>
+                    </ul>
+                </div>
+            </div>            
+        </div>
+    </section>
+
+    <!-- Popular Services Section -->
+    <section class="bg-gray-100 py-15">
+        <div class="container mx-auto">
+            <div class="bg-white rounded p-6 shadow-md">
+                <h4 class="text-2xl font-semibold mb-8 text-center">Popular services</h4>
+                <div class="flex justify-center space-x-4">
+                    <div ng-repeat="card in cardList" class="w-1/5 p-4">
+                        <div class="bg-cover bg-center bg-fixed h-48 rounded-lg shadow-md" style="background-image: url('{{ card.image }}'); background-size: cover;"></div>
+                        <h3 class="text-lg font-semibold mt-2 text-center">{{ card.title }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- "We Think You're Awesome" Section -->
+    <section class="bg-white py-14">
+        <div class="container mx-auto px-4 flex items-center">
+            <div class="w-2/3 pr-8">
+                <div class="bg-white rounded p-6 shadow-md">
+                    <h1 class="text-4xl font-bold mb-4">We think you're awesome.</h1>
+                    <article>
+                        <section>
+                            <h4 class="text-xl font-semibold">An Open community</h4>
+                            <p>Everyone gets a chance here. And everyone can do something they love.</p>
+                        </section>
+                        <section>
+                            <h4 class="text-xl font-semibold">You're heard</h4>
+                            <p>Find the work you love, and get paid for it. In addition, get introduced
+                                to an amazing community of people who value your work.</p>
+                        </section>
+                        <section>
+                            <h4 class="text-xl font-semibold">Be industry relevant, always</h4>
+                            <p>Potential recruiters get access to a talent pool of independent
+                                freelancers who are already an established community. Great for open-source
+                                opportunities as well.</p>
+                        </section>
+                        <section>
+                            <h4 class="text-xl font-semibold">Count on 24/7 support</h4>
+                            <p>Our round-the-clock support team is available to help anytime, anywhere.</p>
+                        </section>
+                    </article>
+                </div>
+            </div>
+            <div class="w-1/3">
+                <img src="./assets/career_boost.png" alt="sample" class="w-full h-auto rounded-lg">
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="bg-white border-t border-gray-200 py-4">
+        <div class="container mx-auto text-center">
+            <p class="text-gray-500">&copy; 2023 Joborr. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        function handleSearch(event) {
+        if (event.key === "Enter") {
+            const searchQuery = document.getElementById("job_search").value;
+            // Encode the search query for URL compatibility
+            const encodedSearchQuery = encodeURIComponent(searchQuery);
+            window.location.href = `./components/searchJobs/index.html?name=${encodedSearchQuery}`;
+        }
+    }
+
+        function searchByCategory(category) {
+            const encodedCategory = encodeURIComponent(category);
+            window.location.href = `./components/searchJobs/index.html?category=${encodedCategory}`;
+        }
+    </script>
+
+    <script>
+        angular.module('joborrApp', [])
+            .controller('MainController', function ($scope, $interval) {
+                $scope.cardList = [
+                    { title: 'Website design', image: 'https://w0.peakpx.com/wallpaper/636/700/HD-wallpaper-background-solid-color.jpg' },
+                    { title: 'Wordpress', image: 'https://images.unsplash.com/photo-1511933801659-156d99ebea3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDN8fHxlbnwwfHx8fHw%3D&auto=format&fit=crop&w=600&q=60' },
+                    { title: 'Logo Design', image: 'https://images.unsplash.com/photo-1587586062323-836089e60d52?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHNvbGlkJTIwY29sb3J8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=600&q=60' },
+                    { title: 'AI Services', image: 'https://fiverr-res.cloudinary.com/q_auto,f_auto,w_255,dpr_2.0/v1/attachments/generic_asset/asset/f27bec553efc12cc60baed89b8f2223e-1674661140708/ai-artists-2x.png' },
+                    { title: 'Art&Design', image: 'https://images.unsplash.com/photo-1504309092620-4d0ec726efa4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80' },
+                ];
+
+                // Simulated login function
+                $scope.login = function () {
+                    // Simulate a successful login
+                    $scope.loginStatus = "Successful Login";
+                    document.getElementById("loginStatus").classList.remove("text-red-500");
+                    document.getElementById("loginStatus").classList.add("text-green-500");
+                };
+                
+                // Function to simulate logout
+                $scope.logout = function () {
+                    $scope.loginStatus = "Not logged in";
+                    document.getElementById("loginStatus").classList.remove("text-green-500");
+                    document.getElementById("loginStatus").classList.add("text-red-500");
+                };
+
+
+                function slideCards() {
+                    $interval(function () {
+                        $scope.cardList.push($scope.cardList.shift());
+                    }, 1500);
+                }
+
+                $scope.initCardSlider = function () {
+                    const cardsContainer = document.querySelector('.card-wrapper');
+                    const cardElements = document.querySelectorAll('.card');
+                    const clonedCards = Array.from(cardElements).map(card => card.cloneNode(true));
+                    clonedCards.forEach(card => cardsContainer.appendChild(card));
+                };
+
+                slideCards();
+            });
+    </script>
+</body>
+
+</html>

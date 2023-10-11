@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html ng-app="joborrApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Job Listings</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+<body ng-controller="MainController" class="bg-cover bg-center bg-fixed min-h-screen font-sans">
+    <div class="flex flex-wrap justify-around items-start p-5" id="cardContainer">
+        <div class="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 p-4" ng-repeat="job in filteredJobs | filter:searchFilter">
+            <div class="bg-white rounded-lg p-4 shadow-md transition-transform hover:scale-105 relative">
+                <h3 class="text-lg font-semibold mb-2">{{ job['Job Title'] }}</h3>
+                <p>Rating: <span class="text-blue-500 font-bold">{{ job.Rating }}</span></p>
+                <p>Company: {{ job['Company Name'] }}</p>
+                <p>Headquarters: {{ job.Headquarters }}</p>
+                <p>Industry: {{ job.Type }}</p>
+                <p>Average Salary: ${{ job.avg_salary }}</p>
+                <a href="javascript:void(0);" class="absolute bottom-0 left-0 right-0 mx-auto py-2 px-4 mt-2 bg-red-500 text-white font-semibold rounded-md transition-colors hover:bg-red-700" ng-click="deleteJob(job)">Delete</a>
+            </div>
+        </div>
+    </div>
+    <div class="p-5">
+        <form ng-submit="search()">
+            <input type="text" ng-model="searchText" placeholder="Search by job title...">
+            <button type="submit" class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-md transition-colors hover:bg-blue-700">Search</button>
+        </form>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script>
+        var app = angular.module('joborrApp', []);
+
+        // Factory to fetch job data
+        app.factory('JobService', function($http) {
+            return {
+                getJobs: function() {
+                    return $http.get('http://localhost:5000/api/jobs');
+                }
+            };
+        });
+
+        app.controller('MainController', function($scope, JobService, $http) {
+            // Fetch jobs using the JobService factory
+            JobService.getJobs().then(function(response) {
+                $scope.dataset = response.data;
+
+                // Initialize filteredJobs with all jobs
+                $scope.filteredJobs = $scope.dataset;
+            });
+
+            // Define the deleteJob function
+            $scope.deleteJob = function(job) {
+                // Send a DELETE request to the server with the job ID
+                $http.delete('http://localhost:5000/api/jobs/' + job._id) // Change the URL to '/api/jobs/:id'
+                    .then(function(response) {
+                        // Remove the deleted job from the view
+                        const index = $scope.filteredJobs.indexOf(job);
+                        if (index !== -1) {
+                            $scope.filteredJobs.splice(index, 1);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                    });
+            };
+
+            // Search functionality
+            $scope.searchText = '';
+
+            $scope.search = function() {
+                $scope.searchFilter = { 'Job Title': $scope.searchText };
+            };
+        });
+    </script>    
+</body>
+</html>

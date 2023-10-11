@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html ng-app="joborrApp">
+  <head>
+    <title>Job Listings</title>
+    <!-- Add Tailwind CSS CDN -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body
+    ng-controller="MainController"
+    class="bg-cover bg-center bg-purple-200 min-h-screen font-sans"
+  >
+    <div class="filter-section bg-white p-4 shadow-md">
+      <div class="filters-container">
+        <h2 class="text-xl font-semibold">Filters</h2>
+        <input
+          type="text"
+          id="name-filter"
+          ng-model="nameSearch"
+          class="w-full px-4 py-2 border rounded-lg placeholder-gray-400 focus:outline-none focus:ring focus:border-blue-300"
+          placeholder="Anything you want to search..."
+        />
+        <h3 class="mt-4 mb-2 text-lg font-semibold">Based on Rating</h3>
+        <div class="rating-buttons flex space-x-2">
+          <button
+            ng-click="setRatingFilter(0, 1)"
+            class="px-4 py-2 bg-blue-500 text-white rounded-lg"
+          >
+            &#9733;1
+          </button>
+          <button
+            ng-click="setRatingFilter(1.1, 2.9)"
+            class="px-4 py-2 bg-blue-500 text-white rounded-lg"
+          >
+            &#9733;2
+          </button>
+          <button
+            ng-click="setRatingFilter(3.0, 3.9)"
+            class="px-4 py-2 bg-blue-500 text-white rounded-lg"
+          >
+            &#9733;3
+          </button>
+          <button
+            ng-click="setRatingFilter(4, null)"
+            class="px-4 py-2 bg-blue-500 text-white rounded-lg"
+          >
+            &#9733;4
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="cart-button-container fixed top-4 right-4 z-10">
+      <button
+        class="cart-button relative text-2xl"
+        ng-class="{'cart-open': isCartOpen}"
+        ng-mouseenter="showCartText = true"
+        ng-mouseleave="showCartText = false"
+      >
+        <span class="cart-icon">&#128722;</span>
+        <span
+          class="cart-text absolute bottom-[-25px] left-1/2 transform -translate-x-1/2 opacity-0 transition-opacity transition-bottom"
+          ng-show="showCartText"
+          >Your applied jobs</span
+        >
+      </button>
+    </div>
+    <div
+      class="cart-expansion fixed top-0 right-[-300px] w-72 h-full bg-white shadow-md overflow-y-auto transition-right duration-300 z-20"
+      ng-show="isCartOpen"
+    >
+      <div class="cart-content p-4">
+        <h3 class="text-xl font-semibold">Your Applied Jobs</h3>
+        <ul>
+          <li ng-repeat="job in appliedJobs" class="text-lg mt-2">
+            {{ job.title }} ({{ job.status }})
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-container flex flex-wrap justify-around p-4">
+        <div class="card w-[calc(33.33% - 20px)] bg-gray-100 rounded-lg p-4 m-2 shadow-md transition-transform hover:scale-102" ng-repeat="job in filteredJobs">
+          <div class="card-content h-full"> <!-- Set a fixed height for the card content -->
+            <h3 class="text-lg font-semibold">{{ job['Job Title'] }}</h3>
+            <p class="text-gray-600">
+              Rating: <span class="rating font-semibold">{{ job.Rating }}</span>
+            </p>
+            <p class="text-gray-600">Company: {{ job['Company Name'] }}</p>
+            <p class="text-gray-600">Headquarters: {{ job.Headquarters }}</p>
+            <p class="text-gray-600">Industry: {{ job.Type }}</p>
+            <p class="text-gray-600">Average Salary: ${{ job.avg_salary }}</p>
+            <a href="javascript:void(0);" class="apply-button inline-block px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold mt-2" ng-click="applyToJob(job)">Apply now</a>
+          </div>
+        </div>
+      </div>
+      
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script>
+      function getQueryParameter(parameterName) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(parameterName);
+      }
+
+      var app = angular.module("joborrApp", []);
+
+      // Factory to fetch job data
+      app.factory("JobService", function ($http) {
+        return {
+          getJobs: function () {
+            return $http.get("http://localhost:5000/api/jobs");
+          },
+        };
+      });
+
+      app.controller("MainController", function ($scope, JobService) {
+        $scope.isCartOpen = false;
+        $scope.showCartText = false;
+
+        $scope.toggleCart = function () {
+          $scope.isCartOpen = !$scope.isCartOpen;
+        };
+
+        // Initialize filteredJobs with an empty array
+        $scope.filteredJobs = [];
+
+        var searchQuery = getQueryParameter('name');
+            if (searchQuery) {
+                // Set the search query as the initial value for nameSearch
+                $scope.nameSearch = decodeURIComponent(searchQuery);
+            } else {
+                $scope.nameSearch = ''; // Default value if not provided in the URL
+            }
+
+        // Fetch jobs using the JobService factory
+        JobService.getJobs().then(function (response) {
+          $scope.dataset = response.data;
+
+          // Initialize filteredJobs with all jobs
+          $scope.filteredJobs = $scope.dataset;
+        });
+
+        $scope.ratingFilterMin = 0;
+        $scope.ratingFilterMax = null;
+
+        $scope.setRatingFilter = function (minRating, maxRating) {
+          $scope.ratingFilterMin = minRating;
+          $scope.ratingFilterMax = maxRating;
+
+          // Apply both rating and name filters
+          applyFilters();
+        };
+
+        $scope.$watch("nameSearch", function (newVal, oldVal) {
+          // Apply both rating and name filters
+          applyFilters();
+        });
+
+        function applyFilters() {
+          // Filter dataset based on search input and rating
+          $scope.filteredJobs = $scope.dataset.filter(function (job) {
+            // Check if the job title contains the search input (case-insensitive)
+            const titleMatch = job["Job Title"]
+              .toLowerCase()
+              .includes($scope.nameSearch.toLowerCase());
+
+            // Check if the rating is within the specified range
+            const ratingMatch =
+              ($scope.ratingFilterMin === null ||
+                job.Rating >= $scope.ratingFilterMin) &&
+              ($scope.ratingFilterMax === null ||
+                job.Rating <= $scope.ratingFilterMax);
+
+            // Return true if both rating and name filters match
+            return ratingMatch && titleMatch;
+          });
+        }
+
+        // Add an array to store applied jobs
+        $scope.appliedJobs = [];
+
+        // Function to apply to a job
+        $scope.applyToJob = function (job) {
+          // Generate a random number (0 or 1) to decide whether to add or reject the job
+          const decision = Math.floor(Math.random() * 2);
+
+          if (decision === 1) {
+            // Add the job to the list of applied jobs
+            $scope.appliedJobs.push(job);
+            // Mark the job as "Applied"
+            job.status = "Applied";
+          } else {
+            // Mark the job as "Rejected"
+            job.status = "Rejected";
+          }
+        };
+
+        // Function to remove a job from the list of applied jobs
+        $scope.removeFromAppliedJobs = function (index) {
+          const job = $scope.appliedJobs[index];
+          // Mark the job as "Rejected" again
+          job.status = "Rejected";
+          // Remove the job from the list
+          $scope.appliedJobs.splice(index, 1);
+        };
+      });
+    </script>
+  </body>
+</html>

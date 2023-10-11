@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html ng-app="loginApp">
+
+<head>
+    <title>Login</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+
+<body ng-controller="LoginController" class="bg-gray-200 flex justify-center items-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-md space-y-4">
+        <!-- Login Type Selection -->
+        <div class="flex space-x-4 justify-center">
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg" ng-click="showAdminLogin()">Admin Login</button>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg" ng-click="showUserLogin()">User Login</button>
+        </div>
+
+        <!-- Admin Login Form -->
+        <div ng-show="adminLoginVisible">
+            <input type="password" placeholder="Passkey" class="border rounded-lg px-3 py-2" ng-model="adminPasskey">
+            <input type="text" placeholder="Username" class="border rounded-lg px-3 py-2" ng-model="adminUsername">
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg" ng-click="adminLogin()">Login</button>
+        </div>
+
+        <!-- User Login Form -->
+        <div ng-show="userLoginVisible"><center>
+            <button class="bg-red-500 text-white px-4 py-2 rounded-lg" ng-click="loginWithGoogle()">Log in using Google</button>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg" ng-click="loginWithFacebook()">Log in using Facebook</button>
+        </center>
+            <p class="text-center">OR</p>
+            <input type="text" placeholder="Email" class="border rounded-lg px-3 py-2" ng-model="userEmail">
+            <input type="password" placeholder="Password" class="border rounded-lg px-3 py-2" ng-model="userPassword">
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg" ng-click="userLogin()">Login</button>
+        </div>
+
+        <!-- Login Status -->
+        <div class="text-green-500 text-center" ng-show="loginStatus">{{ loginStatus }}</div>
+    </div>
+
+    <script>
+        angular.module('loginApp', [])
+            .controller('LoginController', function ($scope, $window) {
+                // Initialize variables
+                $scope.adminPasskey = '';
+                $scope.adminUsername = '';
+                $scope.userEmail = '';
+                $scope.userPassword = '';
+                $scope.loginStatus = '';
+                $scope.adminLoginVisible = false;
+                $scope.userLoginVisible = false;
+
+                // Function to show admin login form
+                $scope.showAdminLogin = function () {
+                    $scope.adminLoginVisible = true;
+                    $scope.userLoginVisible = false;
+                };
+
+                // Function to show user login form
+                $scope.showUserLogin = function () {
+                    $scope.adminLoginVisible = false;
+                    $scope.userLoginVisible = true;
+                };
+
+                // Function to perform admin login
+                $scope.adminLogin = function () {
+                    const validPasskeys = ['0000', '101010', '11211'];
+                    const validUsernames = ['raghul', 'sanjay', 'root', 'user'];
+
+                    if (validPasskeys.includes($scope.adminPasskey) && validUsernames.includes($scope.adminUsername)) {
+                        $window.location.href = '../../index.html'; // Redirect to the index.html page
+                        document.getElementById('jobStatus').textContent = 'Successfully logged in!';
+                    } else {
+                        $scope.loginStatus = 'Improper Login';
+                    }
+                };
+
+                // Function to perform user login
+                $scope.userLogin = function () {
+                    const validEmails = ['dv@dv.com', 'wedfwerg@gerfg.com'];
+                    const validPasswords = ['raghul', 'sanjay', 'root', 'user'];
+
+                    if (validEmails.includes($scope.userEmail) && validPasswords.includes($scope.userPassword)) {
+                        $scope.loginStatus = 'Successfully logged in!';
+                        $window.location.href = 'D:\\Projects\\joborr\\index.html'; // Redirect to the index.html page
+                    } else {
+                        $scope.loginStatus = 'Improper Login';
+                    }
+                };
+
+                // Function to simulate login with Google
+                $scope.loginWithGoogle = function () {
+                    // Implement Google login logic here
+                };
+
+                // Function to simulate login with Facebook
+                $scope.loginWithFacebook = function () {
+                    // Implement Facebook login logic here
+                };
+            });
+    </script>
+</body>
+
+</html>
